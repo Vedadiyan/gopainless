@@ -9,6 +9,11 @@ import (
 func main() {
 	group, commands, options := parse()
 	switch group {
+	case "setup":
+		{
+			gopainless.Setup()
+			break
+		}
 	case "init":
 		{
 			name := (*commands)["-N"]

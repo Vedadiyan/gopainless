@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"os/user"
@@ -75,6 +76,35 @@ func init() {
 	}
 	homeDirectory = usr.HomeDir
 	packageDirectory = fmt.Sprintf("%s/%s/%s", homeDirectory, "go-painless", "packages")
+}
+
+func Setup() {
+	path := fmt.Sprintf("%s/%s/%s", homeDirectory, "go-painless", "bin")
+	if os.Args[0] == fmt.Sprintf("%s/%s", path, goPainlessFileName) {
+		color.Hex("#00ff5f").Println("This version of go-painless has already been setup")
+		return
+	}
+	exists, err := Exists(path)
+	if err != nil {
+		panic(err)
+	}
+	if *exists == false {
+		os.MkdirAll(path, 777)
+	} else {
+		os.Remove(fmt.Sprintf("%s/%s", path, goPainlessFileName))
+	}
+	src, err := os.Open(os.Args[0])
+	if err != nil {
+		panic(err)
+	}
+	dest, err := os.Create(fmt.Sprintf("%s/%s", path, goPainlessFileName))
+	if err != nil {
+		panic(err)
+	}
+	io.Copy(dest, src)
+	src.Close()
+	dest.Close()
+	color.Hex("#00ff5f").Println("go-painless setup successfully")
 }
 
 func PkgFileNew(name string, version string) {
