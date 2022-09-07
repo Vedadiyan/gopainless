@@ -311,8 +311,9 @@ func Write() {
 			continue
 		}
 		path := fmt.Sprintf("%s/%s", packageDirectory, key)
+		output.WriteString("\r\n")
 		output.WriteString(fmt.Sprintf("replace %s => \"%s\"", key, strings.ReplaceAll(path, "\\", "\\\\")))
-		output.WriteString("\n")
+		output.WriteString("\r\n")
 		output.WriteString(fmt.Sprintf("require %s v1.0.0", key))
 	}
 	err = os.WriteFile("go.mod", output.Bytes(), 777)
@@ -372,7 +373,6 @@ func getPrivatePackage(url string, name string, recursive bool) error {
 		return err
 	}
 	if recursive {
-		// Check this line later
 		ModFileCreate(name, fmt.Sprintf("%s/%s", packageDirectory, name))
 		Run(fmt.Sprintf("%s/go-painless/bin/%s", homeDirectory, goPainlessFileName), "restore", fmt.Sprintf("%s/%s", packageDirectory, name))
 	}
