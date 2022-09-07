@@ -6,7 +6,9 @@ Go-Painless is a simple painless package manager that resembles core features an
 or for Windows or Mac
 `go build -o gopainless.(exe|dmg) ./cmd/`
 then you can easily run the executable with the `setup` command: 
-`./gopainless setup`
+`./gopainless setup`.
+
+You need to add the path `HomeDirectory/go-painless/bin` to your path variables.
 ## Commands 
 
 *all UPPERCARE flags staring with a single `-` are required*
