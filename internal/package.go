@@ -198,7 +198,7 @@ func PkgAdd(uri string, name string, private bool, update bool, recursive bool) 
 	}
 	if update && *exists == true {
 		color.Hex("#00ff5f").Println("Deleting", packagePath)
-		err = _delete(packagePath)
+		err = deleteDir(packagePath)
 		if err != nil {
 			panic(err)
 		}
@@ -254,7 +254,7 @@ func PkgRestore(recursive bool, update bool) {
 				continue
 			}
 			color.HEX("#00ff5f").Println("Deleting", packagePath)
-			err = _delete(packagePath)
+			err = deleteDir(packagePath)
 			if err != nil {
 				panic(err)
 			}
@@ -346,14 +346,14 @@ func Clean() {
 		panic(err)
 	}
 	if *modFileExists == true {
-		_delete("go.mod")
+		deleteFile("go.mod")
 	}
 	sumFileExists, err := Exists("go.sum")
 	if err != nil {
 		panic(err)
 	}
 	if *sumFileExists == true {
-		_delete("go.sum")
+		deleteFile("go.sum")
 	}
 }
 
@@ -399,7 +399,7 @@ func Run(cmd string, args string, workingDirectory string) error {
 	return nil
 }
 
-func _delete(packagePath string) error {
+func deleteDir(packagePath string) error {
 	_path, err := os.Open(packagePath)
 	if err != nil {
 		return err
@@ -420,4 +420,7 @@ func _delete(packagePath string) error {
 		}
 	}
 	return nil
+}
+func deleteFile(filePath string) error {
+	return os.Remove(filePath)
 }
