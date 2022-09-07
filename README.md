@@ -2,8 +2,11 @@
 Go-Painless is a simple painless package manager that resembles core features and mechanism of npm. It manages and maintains all project's dependencies in a `.json` file allowing them to be restored when required without relying on the `go.mod` and `go.sum` files. When a restore operation is requested, go-painless will automatically create `go.mod` and `go.sum` files both for the current project and all its dependencies. Accordingly, `go.mod` and `go.mod` can be added to the `.gitignore` file. 
 
 ## Installation Guid
-... Coming up
-
+`go build -o gopainless ./cmd/` 
+or for Windows or Mac
+`go build -o gopainless.(exe|dmg) ./cmd/`
+then you can easily run the executable with the `setup` command: 
+`./gopainless setup`
 ## Commands 
 
 *all UPPERCARE flags staring with a single `-` are required*
