@@ -10,7 +10,7 @@ func main() {
 	commands.
 		RegisterGroup("create", "Used for creating a new project based on an existing template").
 		RegisterCommand("T", "Specifies the template url", nil).
-		RegisterCommand("N", "Specified the project name", nil)
+		RegisterCommand("N", "Specifies the project name", nil)
 	commands.
 		RegisterGroup("setup", "Setups go-painless in the system")
 	commands.
@@ -26,7 +26,7 @@ func main() {
 		RegisterFlag("update", "Used for updating previously downloaded dependencies")
 	commands.
 		RegisterGroup("remove", "Removes an existing dependency").
-		RegisterCommand("N", "Specified dependency name", nil)
+		RegisterCommand("N", "Specifies dependency name", nil)
 	commands.
 		RegisterGroup("restore", "Restores dependencies in an existing project").
 		RegisterFlag("tidy", "Runs go mod tidy after restoring the project").
