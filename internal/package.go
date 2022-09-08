@@ -460,4 +460,8 @@ func CreateFromTemplate(templateName string, projectName string) {
 	if err != nil {
 		panic(err)
 	}
+	err = os.RemoveAll(fmt.Sprintf("./%s/.git", projectName))
+	if err != nil {
+		panic(err)
+	}
 }
