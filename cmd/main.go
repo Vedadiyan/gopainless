@@ -1,19 +1,57 @@
 package main
 
 import (
+	"fmt"
 	gopainless "gopainless/internal"
-	"os"
-	"strings"
 )
 
 func main() {
-	group, commands, options := parse()
+	commands := New()
+	commands.
+		RegisterGroup("create", "Used for creating a new project based on an existing template").
+		RegisterCommand("T", "Specifies the template url", nil).
+		RegisterCommand("N", "Specified the project name", nil)
+	commands.
+		RegisterGroup("setup", "Setups go-painless in the system")
+	commands.
+		RegisterGroup("init", "Initializes a new project").
+		RegisterCommand("N", "Specifies project name", nil).
+		RegisterCommand("V", "Specifies project version", nil)
+	commands.
+		RegisterGroup("install", "Installs a dependency").
+		RegisterCommand("U", "Specifies dependency URL", nil).
+		RegisterCommand("N", "Specifies dependency name", nil).
+		RegisterFlag("private", "Used for installing from private repositories").
+		RegisterFlag("recursive", "Used for recursively installing depdendencies").
+		RegisterFlag("update", "Used for updating previously downloaded dependencies")
+	commands.
+		RegisterGroup("remove", "Removes an existing dependency").
+		RegisterCommand("N", "Specified dependency name", nil)
+	commands.
+		RegisterGroup("restore", "Restores dependencies in an existing project").
+		RegisterFlag("tidy", "Runs go mod tidy after restoring the project").
+		RegisterFlag("update", "Used for updating previously downloaded dependencies")
+	commands.
+		RegisterGroup("clean", "Removed go.mod and go.sum files")
+	commands.
+		RegisterGroup("build", "Build the project").
+		RegisterCommand("R", "Specifies the runtime", nil).
+		RegisterCommand("A", "Specifies build architecture", nil).
+		RegisterCommand("O", "Specifies the output", nil).
+		RegisterCommand("T", "Specifies the target build path", nil)
+	commands.
+		RegisterGroup("tidy", "Runs go mod tidy")
+
+	group, instructions, err := commands.Parse()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	switch group {
 	case "create":
 		{
-			templateName := (*commands)["-T"]
-			projectName := (*commands)["-N"]
-			gopainless.CreateFromTemplate(templateName[0], projectName[0])
+			templateName := instructions.GetMust("T")
+			projectName := instructions.GetMust("N")
+			gopainless.CreateFromTemplate(*templateName, *projectName)
 			break
 		}
 	case "setup":
@@ -23,35 +61,35 @@ func main() {
 		}
 	case "init":
 		{
-			name := (*commands)["-N"]
-			version := (*commands)["-V"]
-			gopainless.PkgFileCreate(name[0], version[0])
-			gopainless.ModFileCreate(name[0], "")
+			name := instructions.GetMust("N")
+			version := instructions.GetMust("V")
+			gopainless.PkgFileCreate(*name, *version)
+			gopainless.ModFileCreate(*name, "")
 			break
 		}
 	case "install":
 		{
-			url := (*commands)["-U"]
-			name := (*commands)["-N"]
-			private := (*options)["--private"]
-			recursive := (*options)["--recursive"]
-			update := (*options)["--update"]
+			url := instructions.GetMust("U")
+			name := instructions.GetMust("N")
+			private := instructions.GetFlag("private")
+			recursive := instructions.GetFlag("recursive")
+			update := instructions.GetFlag("update")
 			gopainless.PkgFileLoad()
-			gopainless.PkgAdd(url[0], name[0], private, update, recursive)
+			gopainless.PkgAdd(*url, *name, private, update, recursive)
 			gopainless.Write()
 			break
 		}
 	case "remove":
 		{
-			name := (*commands)["-N"]
-			gopainless.PkgDelete(name[0])
+			name := instructions.GetMust("N")
+			gopainless.PkgDelete(*name)
 			gopainless.Write()
 			break
 		}
 	case "restore":
 		{
-			tidy := (*options)["--tidy"]
-			update := (*options)["--update"]
+			tidy := instructions.GetFlag("tidy")
+			update := instructions.GetFlag("update")
 			gopainless.Clean()
 			gopainless.PkgFileLoad()
 			gopainless.PkgRestore(true, update)
@@ -68,11 +106,11 @@ func main() {
 		}
 	case "build":
 		{
-			goos := (*commands)["-R"]
-			goarch := (*commands)["-A"]
-			output := (*commands)["-O"]
-			target := (*commands)["-T"]
-			gopainless.Build(goos[0], goarch[0], output[0], target[0])
+			goos := instructions.GetMust("R")
+			goarch := instructions.GetMust("A")
+			output := instructions.GetMust("O")
+			target := instructions.GetMust("T")
+			gopainless.Build(*goos, *goarch, *output, *target)
 			break
 		}
 	case "tidy":
@@ -86,31 +124,4 @@ func main() {
 		}
 	}
 
-}
-
-func parse() (string, *map[string][]string, *map[string]bool) {
-	commands := make(map[string][]string)
-	options := make(map[string]bool)
-	var group string
-	var prev *string
-	for i := 1; i < len(os.Args); i++ {
-		val := os.Args[i]
-		if strings.HasPrefix(val, "--") {
-			options[val] = true
-			continue
-		}
-		if strings.HasPrefix(val, "-") {
-			prev = &val
-			continue
-		}
-		if i == 1 {
-			group = val
-			continue
-		}
-		if prev == nil {
-			panic("Invalid Command Line Argument")
-		}
-		commands[*prev] = append(commands[*prev], val)
-	}
-	return group, &commands, &options
 }
