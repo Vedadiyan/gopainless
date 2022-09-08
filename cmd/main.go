@@ -32,9 +32,9 @@ func main() {
 		RegisterFlag("tidy", "Runs go mod tidy after restoring the project").
 		RegisterFlag("update", "Used for updating previously downloaded dependencies")
 	commands.
-		RegisterGroup("clean", "Removed go.mod and go.sum files")
+		RegisterGroup("clean", "Removes go.mod and go.sum files")
 	commands.
-		RegisterGroup("build", "Build the project").
+		RegisterGroup("build", "Builds the project").
 		RegisterCommand("R", "Specifies the runtime", nil).
 		RegisterCommand("A", "Specifies build architecture", nil).
 		RegisterCommand("O", "Specifies the output", nil).
