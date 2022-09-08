@@ -9,6 +9,13 @@ import (
 func main() {
 	group, commands, options := parse()
 	switch group {
+	case "create":
+		{
+			templateName := (*commands)["-T"]
+			projectName := (*commands)["-N"]
+			gopainless.CreateFromTemplate(templateName[0], projectName[0])
+			break
+		}
 	case "setup":
 		{
 			gopainless.Setup()
@@ -73,7 +80,12 @@ func main() {
 			gopainless.Tidy()
 			break
 		}
+	default:
+		{
+			panic("Invalid Command")
+		}
 	}
+
 }
 
 func parse() (string, *map[string][]string, *map[string]bool) {

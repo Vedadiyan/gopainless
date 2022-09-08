@@ -424,3 +424,40 @@ func deleteDir(packagePath string) error {
 func deleteFile(filePath string) error {
 	return os.Remove(filePath)
 }
+
+func changeChange(name string, path string) error {
+	file, err := os.ReadFile(fmt.Sprintf("%s/%s", path, packageManagementFileName))
+	if err != nil {
+		return err
+	}
+	var goPackage Package
+	err = json.Unmarshal(file, &goPackage)
+	if err != nil {
+		return err
+	}
+	goPackage.Name = name
+	err = os.Remove(fmt.Sprintf("%s/%s", path, packageManagementFileName))
+	if err != nil {
+		return err
+	}
+	data, err := json.Marshal(goPackage)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(fmt.Sprintf("%s/%s", path, packageManagementFileName), data, 777)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func CreateFromTemplate(templateName string, projectName string) {
+	err := Run("git", fmt.Sprintf("clone %s %s", templateName, projectName), "")
+	if err != nil {
+		panic(err)
+	}
+	err = changeChange(projectName, fmt.Sprintf("./%s", projectName))
+	if err != nil {
+		panic(err)
+	}
+}
