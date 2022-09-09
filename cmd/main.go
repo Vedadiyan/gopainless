@@ -42,15 +42,15 @@ func main() {
 	commands.
 		RegisterGroup("tidy", "Runs go mod tidy")
 
-	group, instructions, err := commands.Parse()
+	group, token, err := commands.Parse()
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 	switch group {
 	case "create":
 		{
-			templateName := instructions.GetMust("T")
-			projectName := instructions.GetMust("N")
+			templateName := token.GetMust("T")
+			projectName := token.GetMust("N")
 			gopainless.CreateFromTemplate(*templateName, *projectName)
 			break
 		}
@@ -61,19 +61,19 @@ func main() {
 		}
 	case "init":
 		{
-			name := instructions.GetMust("N")
-			version := instructions.GetMust("V")
+			name := token.GetMust("N")
+			version := token.GetMust("V")
 			gopainless.PkgFileCreate(*name, *version)
 			gopainless.ModFileCreate(*name, "")
 			break
 		}
 	case "install":
 		{
-			url := instructions.GetMust("U")
-			name := instructions.GetMust("N")
-			private := instructions.GetFlag("private")
-			recursive := instructions.GetFlag("recursive")
-			update := instructions.GetFlag("update")
+			url := token.GetMust("U")
+			name := token.GetMust("N")
+			private := token.GetFlag("private")
+			recursive := token.GetFlag("recursive")
+			update := token.GetFlag("update")
 			gopainless.PkgFileLoad()
 			gopainless.PkgAdd(*url, *name, private, update, recursive)
 			gopainless.Write()
@@ -81,15 +81,15 @@ func main() {
 		}
 	case "remove":
 		{
-			name := instructions.GetMust("N")
+			name := token.GetMust("N")
 			gopainless.PkgDelete(*name)
 			gopainless.Write()
 			break
 		}
 	case "restore":
 		{
-			tidy := instructions.GetFlag("tidy")
-			update := instructions.GetFlag("update")
+			tidy := token.GetFlag("tidy")
+			update := token.GetFlag("update")
 			gopainless.Clean()
 			gopainless.PkgFileLoad()
 			gopainless.PkgRestore(true, update)
@@ -106,10 +106,10 @@ func main() {
 		}
 	case "build":
 		{
-			goos := instructions.GetMust("R")
-			goarch := instructions.GetMust("A")
-			output := instructions.GetMust("O")
-			target := instructions.GetMust("T")
+			goos := token.GetMust("R")
+			goarch := token.GetMust("A")
+			output := token.GetMust("O")
+			target := token.GetMust("T")
 			gopainless.Build(*goos, *goarch, *output, *target)
 			break
 		}

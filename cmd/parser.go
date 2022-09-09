@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-type Instruction struct {
+type Token struct {
 	must     map[string]*string
 	optional map[string]string
 	flags    map[string]bool
@@ -16,33 +16,33 @@ type Instruction struct {
 }
 
 type Command struct {
-	commands map[string]Instruction
+	commands map[string]Token
 	help     map[string]string
 }
 
 func New() *Command {
 	command := &Command{}
-	command.commands = make(map[string]Instruction)
+	command.commands = make(map[string]Token)
 	command.help = make(map[string]string)
 	return command
 }
 
-func (instructions Instruction) GetMust(command string) *string {
-	return instructions.must[command]
+func (token Token) GetMust(command string) *string {
+	return token.must[command]
 }
 
-func (instructions Instruction) GetOptional(command string) string {
-	return instructions.optional[command]
+func (token Token) GetOptional(command string) string {
+	return token.optional[command]
 }
 
-func (instructions Instruction) GetFlag(command string) bool {
-	return instructions.flags[command]
+func (token Token) GetFlag(command string) bool {
+	return token.flags[command]
 }
 
-func (instruction Instruction) PrintHelp() {
+func (token Token) PrintHelp() {
 	longest := 0
 	sortedKeys := make([]string, 0)
-	for key, value := range instruction.help {
+	for key, value := range token.help {
 		_ = value
 		len := len(key)
 		if len > longest {
@@ -54,15 +54,15 @@ func (instruction Instruction) PrintHelp() {
 		return sortedKeys[i] < sortedKeys[j]
 	})
 	for _, key := range sortedKeys {
-		_, isMust := instruction.must[key]
-		_, isOptional := instruction.must[key]
+		_, isMust := token.must[key]
+		_, isOptional := token.must[key]
 		if isMust || isOptional {
 			fmt.Printf("-")
 			fmt.Print(key)
 			for i := 0; i < (longest-len(key)-1)+10; i++ {
 				fmt.Print(" ")
 			}
-		} else if _, ok := instruction.flags[key]; ok {
+		} else if _, ok := token.flags[key]; ok {
 			fmt.Printf("--")
 			fmt.Print(key)
 			for i := 0; i < (longest-len(key)-2)+10; i++ {
@@ -71,35 +71,35 @@ func (instruction Instruction) PrintHelp() {
 		} else {
 			panic("Unknown Case")
 		}
-		fmt.Println(instruction.help[key])
+		fmt.Println(token.help[key])
 	}
 }
 
-func (instructions *Instruction) RegisterCommand(cmd string, help string, defaultValue *string) *Instruction {
+func (token *Token) RegisterCommand(cmd string, help string, defaultValue *string) *Token {
 	if defaultValue != nil {
-		instructions.optional[cmd] = *defaultValue
+		token.optional[cmd] = *defaultValue
 	} else {
-		instructions.must[cmd] = nil
+		token.must[cmd] = nil
 	}
-	instructions.help[cmd] = help
-	return instructions
+	token.help[cmd] = help
+	return token
 }
-func (instructions *Instruction) RegisterFlag(cmd string, help string) *Instruction {
-	instructions.flags[cmd] = false
-	instructions.help[cmd] = help
-	return instructions
+func (token *Token) RegisterFlag(cmd string, help string) *Token {
+	token.flags[cmd] = false
+	token.help[cmd] = help
+	return token
 }
-func (command *Command) RegisterGroup(group string, help string) *Instruction {
-	instructions := Instruction{}
-	instructions.must = make(map[string]*string)
-	instructions.optional = make(map[string]string)
-	instructions.flags = make(map[string]bool)
-	instructions.help = make(map[string]string)
-	command.commands[group] = instructions
+func (command *Command) RegisterGroup(group string, help string) *Token {
+	token := Token{}
+	token.must = make(map[string]*string)
+	token.optional = make(map[string]string)
+	token.flags = make(map[string]bool)
+	token.help = make(map[string]string)
+	command.commands[group] = token
 	command.help[group] = help
-	return &instructions
+	return &token
 }
-func (command *Command) Parse() (string, *Instruction, error) {
+func (command *Command) Parse() (string, *Token, error) {
 	commands := make(map[string]string)
 	flags := make(map[string]bool)
 	var group string
