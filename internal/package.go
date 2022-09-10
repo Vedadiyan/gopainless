@@ -89,7 +89,7 @@ func Setup() {
 		panic(err)
 	}
 	if *exists == false {
-		os.MkdirAll(path, 777)
+		os.MkdirAll(path, os.ModePerm)
 	} else {
 		os.Remove(fmt.Sprintf("%s/%s", path, goPainlessFileName))
 	}
@@ -168,7 +168,7 @@ func PkgFileCreate(name string, version string) {
 		if err != nil {
 			panic(err)
 		}
-		err = os.WriteFile(packageManagementFileName, goPackageJson, 777)
+		err = os.WriteFile(packageManagementFileName, goPackageJson, os.ModePerm)
 		if err != nil {
 			panic(err)
 		}
@@ -181,7 +181,7 @@ func PkgAdd(uri string, name string, private bool, update bool, recursive bool) 
 		panic("Another package with the same name already exists")
 	}
 	if private {
-		err := getPackage(uri)
+		err := getPrivatePackage(uri, name, recursive, update)
 		if err != nil {
 			panic(err)
 		}
@@ -205,7 +205,7 @@ func PkgAdd(uri string, name string, private bool, update bool, recursive bool) 
 		*exists = false
 	}
 	if *exists == false {
-		err := getPrivatePackage(uri, name, recursive)
+		err := getPrivatePackage(uri, name, recursive, update)
 		if err != nil {
 			panic(err)
 		}
@@ -261,7 +261,7 @@ func PkgRestore(recursive bool, update bool) {
 			*exists = false
 		}
 		if *exists == false {
-			err := getPrivatePackage(value.URI, key, false)
+			err := getPrivatePackage(value.URI, key, recursive, update)
 			exists, err := Exists(fmt.Sprintf("%s/%s", packagePath, "package.json"))
 			if err != nil {
 				panic(err)
@@ -316,7 +316,7 @@ func Write() {
 		output.WriteString("\r\n")
 		output.WriteString(fmt.Sprintf("require %s v1.0.0", key))
 	}
-	err = os.WriteFile("go.mod", output.Bytes(), 777)
+	err = os.WriteFile("go.mod", output.Bytes(), os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
@@ -324,7 +324,7 @@ func Write() {
 	if err != nil {
 		panic(err)
 	}
-	err = os.WriteFile(packageManagementFileName, json, 777)
+	err = os.WriteFile(packageManagementFileName, json, os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
@@ -360,14 +360,18 @@ func Clean() {
 func getPackage(url string) error {
 	return Run("go", fmt.Sprintf("get %s", url), "")
 }
-func getPrivatePackage(url string, name string, recursive bool) error {
+func getPrivatePackage(url string, name string, recursive bool, update bool) error {
 	packageDirectoryExists, err := Exists(packageDirectory)
 	if err != nil {
 		return err
 	}
-	if *packageDirectoryExists == false {
-		os.MkdirAll(packageDirectory, 777)
+	if *packageDirectoryExists == true {
+		if !update {
+			return nil
+		}
+		os.RemoveAll(packageDirectory)
 	}
+	os.MkdirAll(packageDirectory, os.ModePerm)
 	err = Run("git", fmt.Sprintf("clone %s %s", url, name), packageDirectory)
 	if err != nil {
 		return err
@@ -410,7 +414,7 @@ func deleteDir(packagePath string) error {
 	}
 	for _, file := range files {
 		name := fmt.Sprintf("%s/%s", packagePath, file.Name())
-		err = os.Chmod(name, 777)
+		err = os.Chmod(name, os.ModePerm)
 		if err != nil {
 			return err
 		}
@@ -444,7 +448,7 @@ func changeChange(name string, path string) error {
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(fmt.Sprintf("%s/%s", path, packageManagementFileName), data, 777)
+	err = os.WriteFile(fmt.Sprintf("%s/%s", path, packageManagementFileName), data, os.ModePerm)
 	if err != nil {
 		return err
 	}

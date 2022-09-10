@@ -151,6 +151,7 @@ func (command *Command) Parse() (string, *Token, error) {
 		_, ok := value.flags[key]
 		if ok {
 			value.flags[key] = true
+			fmt.Println(value.flags[key])
 		}
 	}
 	if len(errs) != 0 {
