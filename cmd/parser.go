@@ -148,7 +148,7 @@ func (command *Command) Parse() (string, *Token, error) {
 	for key, val := range value.flags {
 		_ = val
 		_ = val
-		_, ok := commands[key]
+		_, ok := flags[key]
 		if ok {
 			value.flags[key] = true
 		}
