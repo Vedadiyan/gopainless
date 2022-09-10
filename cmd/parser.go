@@ -111,7 +111,8 @@ func (command *Command) Parse() (string, *Token, error) {
 			continue
 		}
 		if strings.HasPrefix(val, "-") {
-			prev = &val
+			_val := strings.TrimPrefix(val, "-")
+			prev = &_val
 			continue
 		}
 		if i == 1 {
