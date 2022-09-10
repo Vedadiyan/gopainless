@@ -107,7 +107,7 @@ func (command *Command) Parse() (string, *Token, error) {
 	for i := 1; i < len(os.Args); i++ {
 		val := os.Args[i]
 		if strings.HasPrefix(val, "--") {
-			_val := strings.TrimPrefix(val, "-")
+			_val := strings.TrimPrefix(val, "--")
 			flags[_val] = true
 			continue
 		}
@@ -145,10 +145,10 @@ func (command *Command) Parse() (string, *Token, error) {
 		_ = val
 		value.optional[key] = commands[key]
 	}
-	for key, val := range value.flags {
+	for key, val := range flags {
 		_ = val
-		_ = val
-		_, ok := flags[key]
+		fmt.Println(key)
+		_, ok := value.flags[key]
 		if ok {
 			value.flags[key] = true
 		}
