@@ -185,39 +185,6 @@ func PkgAdd(uri string, name string, private bool, update bool, recursive bool) 
 		if err != nil {
 			panic(err)
 		}
-		goPackage = PackageValue{}
-		goPackage.URI = uri
-		goPackage.Private = private
-		gopackage.Packages[name] = goPackage
-		return
-	}
-	packagePath := fmt.Sprintf("%s/%s", packageDirectory, name)
-	exists, err := Exists(packagePath)
-	if err != nil {
-		panic(err)
-	}
-	if update && *exists == true {
-		color.Hex("#00ff5f").Println("Deleting", packagePath)
-		err = deleteDir(packagePath)
-		if err != nil {
-			panic(err)
-		}
-		*exists = false
-	}
-	if *exists == false {
-		err := getPrivatePackage(uri, name, recursive, update)
-		if err != nil {
-			panic(err)
-		}
-		goPackage = PackageValue{}
-		goPackage.URI = uri
-		goPackage.Private = private
-		gopackage.Packages[name] = goPackage
-		err = Run("go", "mod tidy", packagePath)
-		if err != nil {
-			panic(err)
-		}
-		return
 	}
 	goPackage = PackageValue{}
 	goPackage.URI = uri
@@ -245,31 +212,17 @@ func PkgRestore(recursive bool, update bool) {
 			continue
 		}
 		packagePath := fmt.Sprintf("%s/%s", packageDirectory, key)
-		exists, err := Exists(packagePath)
+		err := getPrivatePackage(value.URI, key, recursive, update)
+		if err != nil {
+			panic(err)
+		}
+		exists, err := Exists(fmt.Sprintf("%s/%s", packagePath, "package.json"))
 		if err != nil {
 			panic(err)
 		}
 		if *exists == true {
-			if !update {
-				continue
-			}
-			color.HEX("#00ff5f").Println("Deleting", packagePath)
-			err = deleteDir(packagePath)
-			if err != nil {
-				panic(err)
-			}
-			*exists = false
-		}
-		if *exists == false {
-			err := getPrivatePackage(value.URI, key, recursive, update)
-			exists, err := Exists(fmt.Sprintf("%s/%s", packagePath, "package.json"))
-			if err != nil {
-				panic(err)
-			}
-			if *exists == true {
-				//ModFileCreate(key, packagePath)
-				Run(fmt.Sprintf("%s/go-painless/bin/%s", homeDirectory, goPainlessFileName), "restore", fmt.Sprintf("%s/%s", packagePath, key))
-			}
+			//ModFileCreate(key, packagePath)
+			Run(fmt.Sprintf("%s/go-painless/bin/%s", homeDirectory, goPainlessFileName), "restore", fmt.Sprintf("%s/%s", packagePath, key))
 		}
 		Run("go", "mod tidy", packagePath)
 	}
@@ -294,6 +247,9 @@ func Write() {
 		}
 		var _index *int
 		for index, value := range buffer {
+			if value == nil {
+				continue
+			}
 			if strings.Contains(line, *value) {
 				_index = &index
 				break
@@ -301,6 +257,9 @@ func Write() {
 		}
 		if _index != nil {
 			buffer[*_index] = nil
+			continue
+		}
+		if len(line) == 0 {
 			continue
 		}
 		output.WriteString(line)
@@ -365,13 +324,17 @@ func getPrivatePackage(url string, name string, recursive bool, update bool) err
 	if err != nil {
 		return err
 	}
-	if *packageDirectoryExists == true {
+	if *packageDirectoryExists == false {
+		os.MkdirAll(packageDirectory, os.ModePerm)
+	}
+	packagePath := fmt.Sprintf("%s/%s", packageDirectory, name)
+	packagePathExists, err := Exists(packagePath)
+	if *packagePathExists == true {
 		if !update {
 			return nil
 		}
-		os.RemoveAll(packageDirectory)
+		os.RemoveAll(packagePath)
 	}
-	os.MkdirAll(packageDirectory, os.ModePerm)
 	err = Run("git", fmt.Sprintf("clone %s %s", url, name), packageDirectory)
 	if err != nil {
 		return err

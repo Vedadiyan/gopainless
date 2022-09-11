@@ -147,11 +147,9 @@ func (command *Command) Parse() (string, *Token, error) {
 	}
 	for key, val := range flags {
 		_ = val
-		fmt.Println(key)
 		_, ok := value.flags[key]
 		if ok {
 			value.flags[key] = true
-			fmt.Println(value.flags[key])
 		}
 	}
 	if len(errs) != 0 {
