@@ -267,7 +267,7 @@ func PkgRestore(recursive bool, update bool) {
 				panic(err)
 			}
 			if *exists == true {
-				ModFileCreate(key, packagePath)
+				//ModFileCreate(key, packagePath)
 				Run(fmt.Sprintf("%s/go-painless/bin/%s", homeDirectory, goPainlessFileName), "restore", fmt.Sprintf("%s/%s", packagePath, key))
 			}
 		}
