@@ -339,9 +339,13 @@ func getPrivatePackage(url string, name string, recursive bool, update bool) err
 	if err != nil {
 		return err
 	}
-	if recursive {
-		ModFileCreate(name, fmt.Sprintf("%s/%s", packageDirectory, name))
-		Run(fmt.Sprintf("%s/go-painless/bin/%s", homeDirectory, goPainlessFileName), "restore", fmt.Sprintf("%s/%s", packageDirectory, name))
+	packageFileExists, err := Exists(fmt.Sprintf("%s/%s", packagePath, packageManagementFileName))
+	if err != nil {
+		panic(err)
+	}
+	if *packageFileExists == true && recursive {
+		ModFileCreate(name, fmt.Sprintf("%s/%s", packagePath, name))
+		Run(fmt.Sprintf("%s/go-painless/bin/%s", homeDirectory, goPainlessFileName), "restore", fmt.Sprintf("%s/%s", packagePath, name))
 	}
 	return nil
 }
