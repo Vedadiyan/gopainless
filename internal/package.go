@@ -335,6 +335,12 @@ func getPrivatePackage(url string, name string, recursive bool, update bool) err
 		}
 		os.RemoveAll(packagePath)
 	}
+	if !strings.HasPrefix(url, "http") {
+		url = fmt.Sprintf("https://%s", url)
+	}
+	if !strings.HasSuffix(url, ".git") {
+		url = fmt.Sprintf("%s.git", url)
+	}
 	err = Run("git", fmt.Sprintf("clone %s %s", url, name), packageDirectory)
 	if err != nil {
 		return err
