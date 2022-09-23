@@ -133,7 +133,7 @@ func PkgFileLoad() {
 func ModFileCreate(name string, workingDirectory string) {
 	err := Run("go", fmt.Sprintf("mod init %s", name), workingDirectory)
 	if err != nil {
-		panic("Could not create mod file")
+		fmt.Println("WARNING: could not create mod file")
 	}
 }
 
@@ -350,8 +350,10 @@ func getPrivatePackage(url string, name string, recursive bool, update bool) err
 		panic(err)
 	}
 	if *packageFileExists == true && recursive {
-		ModFileCreate(name, fmt.Sprintf("%s/%s", packagePath, name))
-		Run(fmt.Sprintf("%s/go-painless/bin/%s", homeDirectory, goPainlessFileName), "restore", fmt.Sprintf("%s/%s", packagePath, name))
+		// ModFileCreate(name, fmt.Sprintf("%s/%s", packagePath, name))
+		// Run(fmt.Sprintf("%s/go-painless/bin/%s", homeDirectory, goPainlessFileName), "restore", fmt.Sprintf("%s/%s", packagePath, name))
+		ModFileCreate(name, packagePath)
+		Run(fmt.Sprintf("%s/go-painless/bin/%s", homeDirectory, goPainlessFileName), "restore", packagePath)
 	}
 	return nil
 }
