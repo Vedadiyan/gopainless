@@ -164,7 +164,7 @@ func PkgFileCreate(name string, version string) {
 		gopackage.Name = name
 		gopackage.Version = version
 		gopackage.Packages = map[string]PackageValue{}
-		goPackageJson, err := json.Marshal(&gopackage)
+		goPackageJson, err := json.MarshalIndent(&gopackage, "", "\t")
 		if err != nil {
 			panic(err)
 		}
@@ -279,7 +279,7 @@ func Write() {
 	if err != nil {
 		panic(err)
 	}
-	json, err := json.Marshal(&gopackage)
+	json, err := json.MarshalIndent(&gopackage, "", "\t")
 	if err != nil {
 		panic(err)
 	}
@@ -419,7 +419,7 @@ func changeChange(name string, path string) error {
 	if err != nil {
 		return err
 	}
-	data, err := json.Marshal(goPackage)
+	data, err := json.MarshalIndent(goPackage, "", "\t")
 	if err != nil {
 		return err
 	}
