@@ -185,6 +185,11 @@ func PkgAdd(uri string, name string, private bool, update bool, recursive bool) 
 		if err != nil {
 			panic(err)
 		}
+	} else {
+		err := getPackage(uri)
+		if err != nil {
+			panic(err)
+		}
 	}
 	goPackage = PackageValue{}
 	goPackage.URI = uri
