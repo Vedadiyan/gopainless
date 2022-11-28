@@ -11,7 +11,6 @@ import (
 	"os/user"
 	"runtime"
 	"strings"
-	"time"
 
 	"github.com/gookit/color"
 )
@@ -133,7 +132,6 @@ func PkgFileLoad() {
 
 func ModFileCreate(name string, workingDirectory string) {
 	err := Run("go", fmt.Sprintf("mod init %s", name), workingDirectory)
-	<-time.After(1000)
 	if err != nil {
 		fmt.Println("WARNING: could not create mod file")
 	}
