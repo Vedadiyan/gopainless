@@ -177,7 +177,7 @@ func PkgFileCreate(name string, version string) {
 
 func PkgAdd(uri string, name string, private bool, update bool, recursive bool) {
 	goPackage, ok := gopackage.Packages[name]
-	if ok {
+	if ok && !update {
 		panic("Another package with the same name already exists")
 	}
 	if private {
