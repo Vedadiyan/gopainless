@@ -88,7 +88,7 @@ func Setup() {
 	if err != nil {
 		panic(err)
 	}
-	if *exists {
+	if *exists == false {
 		os.MkdirAll(path, os.ModePerm)
 	} else {
 		os.Remove(fmt.Sprintf("%s/%s", path, goPainlessFileName))
@@ -156,10 +156,10 @@ func PkgFileCreate(name string, version string) {
 	if err != nil {
 		panic(err)
 	}
-	if *exists {
+	if *exists == true {
 		panic("package.json file already exists")
 	}
-	if *exists {
+	if *exists == false {
 		gopackage = Package{}
 		gopackage.Name = name
 		gopackage.Version = version
@@ -225,7 +225,7 @@ func PkgRestore(recursive bool, update bool) {
 		if err != nil {
 			panic(err)
 		}
-		if *exists {
+		if *exists == true {
 			//ModFileCreate(key, packagePath)
 			Run(fmt.Sprintf("%s/go-painless/bin/%s", homeDirectory, goPainlessFileName), "restore", fmt.Sprintf("%s/%s", packagePath, key))
 		}
@@ -309,14 +309,14 @@ func Clean() {
 	if err != nil {
 		panic(err)
 	}
-	if *modFileExists {
+	if *modFileExists == true {
 		deleteFile("go.mod")
 	}
 	sumFileExists, err := Exists("go.sum")
 	if err != nil {
 		panic(err)
 	}
-	if *sumFileExists {
+	if *sumFileExists == true {
 		deleteFile("go.sum")
 	}
 }
@@ -329,7 +329,7 @@ func getPrivatePackage(url string, name string, recursive bool, update bool) err
 	if err != nil {
 		return err
 	}
-	if *packageDirectoryExists {
+	if *packageDirectoryExists == false {
 		os.MkdirAll(packageDirectory, os.ModePerm)
 	}
 	packagePath := fmt.Sprintf("%s/%s", packageDirectory, name)
@@ -337,7 +337,7 @@ func getPrivatePackage(url string, name string, recursive bool, update bool) err
 	if err != nil {
 		return err
 	}
-	if *packagePathExists {
+	if *packagePathExists == true {
 		if !update {
 			return nil
 		}
@@ -357,7 +357,7 @@ func getPrivatePackage(url string, name string, recursive bool, update bool) err
 	if err != nil {
 		panic(err)
 	}
-	if *packageFileExists && recursive {
+	if *packageFileExists == true && recursive {
 		// ModFileCreate(name, fmt.Sprintf("%s/%s", packagePath, name))
 		// Run(fmt.Sprintf("%s/go-painless/bin/%s", homeDirectory, goPainlessFileName), "restore", fmt.Sprintf("%s/%s", packagePath, name))
 		ModFileCreate(name, packagePath)
@@ -386,28 +386,28 @@ func Run(cmd string, args string, workingDirectory string) error {
 	return nil
 }
 
-//	func deleteDir(packagePath string) error {
-//		_path, err := os.Open(packagePath)
-//		if err != nil {
-//			return err
-//		}
-//		files, err := _path.Readdir(-1)
-//		if err != nil {
-//			return err
-//		}
-//		for _, file := range files {
-//			name := fmt.Sprintf("%s/%s", packagePath, file.Name())
-//			err = os.Chmod(name, os.ModePerm)
-//			if err != nil {
-//				return err
-//			}
-//			err = os.RemoveAll(name)
-//			if err != nil {
-//				return err
-//			}
-//		}
-//		return nil
-//	}
+func deleteDir(packagePath string) error {
+	_path, err := os.Open(packagePath)
+	if err != nil {
+		return err
+	}
+	files, err := _path.Readdir(-1)
+	if err != nil {
+		return err
+	}
+	for _, file := range files {
+		name := fmt.Sprintf("%s/%s", packagePath, file.Name())
+		err = os.Chmod(name, os.ModePerm)
+		if err != nil {
+			return err
+		}
+		err = os.RemoveAll(name)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 func deleteFile(filePath string) error {
 	return os.Remove(filePath)
 }
