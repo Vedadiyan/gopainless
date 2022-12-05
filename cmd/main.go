@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	gopainless "github.com/Vedadiyan/gopainless/internal"
+
+	gopainless "github.com/vedadiyan/gopainless/internal"
 )
 
 func main() {
