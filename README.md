@@ -34,3 +34,16 @@ You need to add the path `HomeDirectory/go-painless/bin` to your path variables.
 It is recommended to always use `go-painless tidy` after `go-painless restore`.  This is because `go-painless` is a complement to the original `go` command. 
 When using `go-painless`, the project has to be initiated using `go-painless initialize` and all dependencies have to be maintained using the `go-painless install` commands.
 
+## 🤝 Contibution
+Feel free to contibute by forking the project! All new features are welcome. For any issues please open an issue so we can find and fix the problem. 
+
+## 💫 Show your support
+
+Give a ⭐️ if it kills the pain of managing dependencies in your go projects!
+
+## 📝 License
+
+Copyright © 2022 [Pouya Vedadiyan](https://github.com/vedadiyan).
+
+This project is [MIT](./LICENSE) licensed.
+
