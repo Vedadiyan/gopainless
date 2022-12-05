@@ -12,6 +12,9 @@ then you can easily run the executable with the `setup` command:
 `./gopainless setup`.
 
 You need to add the path `HomeDirectory/go-painless/bin` to your path variables.
+
+**In Linux you should assign executable permissions as well. For example `chmod 777 ~/go-painless/bin/go-painless`**
+
 ## 💡 Commands 
 
 *all UPPERCARE flags staring with a single `-` are required*
