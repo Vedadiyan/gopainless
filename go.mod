@@ -1,4 +1,4 @@
-module gopainless
+module github.com/vedadiyan/gopainless
 
 go 1.18
 
