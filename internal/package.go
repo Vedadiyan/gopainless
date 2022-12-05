@@ -334,6 +334,9 @@ func getPrivatePackage(url string, name string, recursive bool, update bool) err
 	}
 	packagePath := fmt.Sprintf("%s/%s", packageDirectory, name)
 	packagePathExists, err := Exists(packagePath)
+	if err != nil {
+		return err
+	}
 	if *packagePathExists == true {
 		if !update {
 			return nil
