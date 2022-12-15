@@ -51,7 +51,11 @@ func main() {
 	group, token, err := commands.Parse()
 	if err != nil {
 		if err == COMMAND_GROUP_NOT_FOUND {
-			group = "go"
+			if len(os.Args) != 1 {
+				group = "go"
+			} else {
+				group = "help"
+			}
 		} else {
 			color.Hex(gopainless.RED).Println("Error:")
 			fmt.Println()
