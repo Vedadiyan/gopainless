@@ -21,14 +21,13 @@ You need to add the path `HomeDirectory/go-painless/bin` to your path variables.
 
 |Command| Description  | Example | Notes |
 |--|--|--|--|
-| initialize | creates a new go project  | go-painless initialize -N demo -V v1.0.0| -N = the name of the project <br /> -V = the version of the project 
+| initialize | creates a new go project  | go-painless add -N demo -V v1.0.0| -N = the name of the project <br /> -V = the version of the project 
 | create | creates a project based on a template project | go-painless create -T github.com/abc/efg.git -N github.com/abc/xyz | -T = the template repository url <br/> -N = the name of the project
-|install| installs a go dependency | go-painless install -U https://github.com/abc/efg.git -N custom_dependency_name --private --recursive | -U = the URL of the dependency (whether private or public) <br /> -N = the name used to reference the dependency. This name is used for referencing private packages.  <br />  --private = used for installing private packages <br /> --recursive = used for installing nested dependencies in go-painless maintained packages <br /> --update = used for updating existing packages 
+|add| adds a go dependency | go-painless install -U https://github.com/abc/efg.git -N custom_dependency_name --private --recursive | -U = the URL of the dependency (whether private or public) <br /> -N = the name used to reference the dependency. This name is used for referencing private packages.  <br />  --private = used for installing private packages <br /> --recursive = used for installing nested dependencies in go-painless maintained packages <br /> --update = used for updating existing packages 
 | remove | removes a go dependency | go-painless remove -N custom_dependency_name | -N = the name of the dependency to be removed
 | restore | restores all dependencies | go-painless restore | --update = used for updating existing dependency <br /> --update-global = used for updating global dependencies (Experimental) <br /> --tidy = runs `go mod tidy` after the restore has completed 
-| clean | cleans the project | go-painless clean | -
-| tidy | runs `go mod tidy` | go-painless tidy | - 
-| build | builds a go project | go-painless build -R linux -A amd64 -O ./ -T ./cmd/ | -R = specifies target OS <br /> -A = specifies target architecture <br /> -O = specifies the output directory <br /> -T = specifies the go file or folder to build 
+| clear | clear the project | go-painless clear | -
+| publish | creates binaries for a go project | go-painless publish -R linux -A amd64 -O ./ -T ./cmd/ | -R = specifies target OS <br /> -A = specifies target architecture <br /> -O = specifies the output directory <br /> -T = specifies the go file or folder to build 
 
 ### Tips
 It is recommended to always use `go-painless tidy` after `go-painless restore`.  This is because `go-painless` is a complement to the original `go` command. 
