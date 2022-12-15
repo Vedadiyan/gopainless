@@ -374,7 +374,7 @@ func Run(cmd string, args string, workingDirectory *string) error {
 	_cmd.Stderr = &errb
 	err := _cmd.Run()
 	if errb.Len() > 0 {
-		color.HEX(RED).Println(errb.String())
+		color.HEX(YELLOW).Println(errb.String())
 	}
 	if outb.Len() > 0 {
 		color.Hex(YELLOW).Println(outb.String())

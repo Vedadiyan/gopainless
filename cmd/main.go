@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"strings"
+	"unicode"
 
 	"github.com/gookit/color"
 	gopainless "github.com/vedadiyan/gopainless/internal"
@@ -139,10 +141,17 @@ func main() {
 			fmt.Println()
 			color.Hex(gopainless.GREEN).Println(commands.Help())
 			fmt.Println("Would you like to view original Go command help? (y/N)")
-			fmt.Scanln()
-			fmt.Println("Original Go Commands")
-			fmt.Println()
-			gopainless.Run("go", "--help", nil)
+			reader := bufio.NewReader(os.Stdin)
+			c, _, err := reader.ReadRune()
+			if err != nil {
+				panic(err)
+			}
+			if unicode.ToLower(c) == 'y' {
+				fmt.Println("Original Go Commands")
+				fmt.Println()
+				gopainless.Run("go", "--help", nil)
+			}
+
 		}
 	case "go":
 		{
