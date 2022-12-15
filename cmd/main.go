@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strings"
 
+	"github.com/gookit/color"
 	gopainless "github.com/vedadiyan/gopainless/internal"
 )
 
@@ -19,7 +22,7 @@ func main() {
 		RegisterCommand("N", "Specifies project name", nil).
 		RegisterCommand("V", "Specifies project version", nil)
 	commands.
-		RegisterGroup("install", "Installs a dependency").
+		RegisterGroup("add", "Adds a dependency").
 		RegisterCommand("U", "Specifies dependency URL", nil).
 		RegisterCommand("N", "Specifies dependency name", nil).
 		RegisterFlag("private", "Used for installing from private repositories").
@@ -33,19 +36,30 @@ func main() {
 		RegisterFlag("tidy", "Runs go mod tidy after restoring the project").
 		RegisterFlag("update", "Used for updating previously downloaded dependencies")
 	commands.
-		RegisterGroup("clean", "Removes go.mod and go.sum files")
+		RegisterGroup("clear", "Removes go.mod and go.sum files")
 	commands.
-		RegisterGroup("build", "Builds the project").
+		RegisterGroup("publish", "Builds the project").
 		RegisterCommand("R", "Specifies the runtime", nil).
 		RegisterCommand("A", "Specifies build architecture", nil).
 		RegisterCommand("O", "Specifies the output", nil).
 		RegisterCommand("T", "Specifies the target build path", nil)
 	commands.
-		RegisterGroup("tidy", "Runs go mod tidy")
+		RegisterGroup("help", "Shows go-painless help")
 
 	group, token, err := commands.Parse()
 	if err != nil {
-		fmt.Println(err.Error())
+		if err == COMMAND_GROUP_NOT_FOUND {
+			group = "go"
+		} else {
+			color.Hex(gopainless.RED).Println("Error:")
+			fmt.Println()
+			color.Hex(gopainless.RED).Println(err.Error())
+			fmt.Println()
+			color.Hex(gopainless.GREEN).Println("Help:")
+			fmt.Println()
+			color.Hex(gopainless.GREEN).Println(token.Help())
+			return
+		}
 	}
 	switch group {
 	case "create":
@@ -68,7 +82,7 @@ func main() {
 			gopainless.ModFileCreate(*name, "")
 			break
 		}
-	case "install":
+	case "add":
 		{
 			url := token.GetMust("U")
 			name := token.GetMust("N")
@@ -100,12 +114,12 @@ func main() {
 			}
 			break
 		}
-	case "clean":
+	case "clear":
 		{
 			gopainless.Clean()
 			break
 		}
-	case "build":
+	case "publish":
 		{
 			goos := token.GetMust("R")
 			goarch := token.GetMust("A")
@@ -118,6 +132,21 @@ func main() {
 		{
 			gopainless.Tidy()
 			break
+		}
+	case "help":
+		{
+			fmt.Println("Go Painless Commands:")
+			fmt.Println()
+			color.Hex(gopainless.GREEN).Println(commands.Help())
+			fmt.Println("Would you like to view original Go command help? (y/N)")
+			fmt.Scanln()
+			fmt.Println("Original Go Commands")
+			fmt.Println()
+			gopainless.Run("go", "--help", nil)
+		}
+	case "go":
+		{
+			gopainless.Run("go", strings.Join(os.Args[1:], " "), nil)
 		}
 	default:
 		{

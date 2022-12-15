@@ -81,14 +81,14 @@ func init() {
 func Setup() {
 	path := fmt.Sprintf("%s/%s/%s", homeDirectory, "go-painless", "bin")
 	if os.Args[0] == fmt.Sprintf("%s/%s", path, goPainlessFileName) {
-		color.Hex("#00ff5f").Println("This version of go-painless has already been setup")
+		color.Hex(RED).Println("This version of go-painless has already been setup")
 		return
 	}
 	exists, err := Exists(path)
 	if err != nil {
 		panic(err)
 	}
-	if *exists == false {
+	if !exists {
 		os.MkdirAll(path, os.ModePerm)
 	} else {
 		os.Remove(fmt.Sprintf("%s/%s", path, goPainlessFileName))
@@ -104,7 +104,7 @@ func Setup() {
 	io.Copy(dest, src)
 	src.Close()
 	dest.Close()
-	color.Hex("#00ff5f").Println("go-painless setup successfully")
+	color.Hex(GREEN).Println("go-painless setup successfully")
 }
 
 func PkgFileNew(name string, version string) {
@@ -131,24 +131,24 @@ func PkgFileLoad() {
 }
 
 func ModFileCreate(name string, workingDirectory string) {
-	err := Run("go", fmt.Sprintf("mod init %s", name), workingDirectory)
+	err := Run("go", fmt.Sprintf("mod init %s", name), &workingDirectory)
 	if err != nil {
 		fmt.Println("WARNING: could not create mod file")
 	}
 }
 
-func Exists(filePath string) (*bool, error) {
+func Exists(filePath string) (bool, error) {
 	_, err := os.Stat(filePath)
 	var output bool
 	if err == nil {
 		output = true
-		return &output, nil
+		return output, nil
 	}
 	if errors.Is(err, os.ErrNotExist) {
 		output = false
-		return &output, nil
+		return output, nil
 	}
-	return nil, err
+	return false, err
 }
 
 func PkgFileCreate(name string, version string) {
@@ -156,22 +156,20 @@ func PkgFileCreate(name string, version string) {
 	if err != nil {
 		panic(err)
 	}
-	if *exists == true {
+	if exists {
 		panic("package.json file already exists")
 	}
-	if *exists == false {
-		gopackage = Package{}
-		gopackage.Name = name
-		gopackage.Version = version
-		gopackage.Packages = map[string]PackageValue{}
-		goPackageJson, err := json.MarshalIndent(&gopackage, "", "\t")
-		if err != nil {
-			panic(err)
-		}
-		err = os.WriteFile(packageManagementFileName, goPackageJson, os.ModePerm)
-		if err != nil {
-			panic(err)
-		}
+	gopackage = Package{}
+	gopackage.Name = name
+	gopackage.Version = version
+	gopackage.Packages = map[string]PackageValue{}
+	goPackageJson, err := json.MarshalIndent(&gopackage, "", "\t")
+	if err != nil {
+		panic(err)
+	}
+	err = os.WriteFile(packageManagementFileName, goPackageJson, os.ModePerm)
+	if err != nil {
+		panic(err)
 	}
 }
 
@@ -225,11 +223,12 @@ func PkgRestore(recursive bool, update bool) {
 		if err != nil {
 			panic(err)
 		}
-		if *exists == true {
+		if exists {
 			//ModFileCreate(key, packagePath)
-			Run(fmt.Sprintf("%s/go-painless/bin/%s", homeDirectory, goPainlessFileName), "restore", fmt.Sprintf("%s/%s", packagePath, key))
+			workingDirectory := fmt.Sprintf("%s/%s", packagePath, key)
+			Run(fmt.Sprintf("%s/go-painless/bin/%s", homeDirectory, goPainlessFileName), "restore", &workingDirectory)
 		}
-		Run("go", "mod tidy", packagePath)
+		Run("go", "mod tidy", &packagePath)
 	}
 }
 
@@ -295,13 +294,13 @@ func Write() {
 }
 
 func Tidy() {
-	Run("go", "mod tidy", "")
+	Run("go", "mod tidy", nil)
 }
 
 func Build(goos string, goarch string, output string, target string) {
 	os.Setenv("GOOS", goos)
 	os.Setenv("GOARCH", goarch)
-	Run("go", fmt.Sprintf("build -o %s %s", output, target), "")
+	Run("go", fmt.Sprintf("build -o %s %s", output, target), nil)
 }
 
 func Clean() {
@@ -309,27 +308,27 @@ func Clean() {
 	if err != nil {
 		panic(err)
 	}
-	if *modFileExists == true {
+	if modFileExists {
 		deleteFile("go.mod")
 	}
 	sumFileExists, err := Exists("go.sum")
 	if err != nil {
 		panic(err)
 	}
-	if *sumFileExists == true {
+	if sumFileExists {
 		deleteFile("go.sum")
 	}
 }
 
 func getPackage(url string) error {
-	return Run("go", fmt.Sprintf("get %s", url), "")
+	return Run("go", fmt.Sprintf("get %s", url), nil)
 }
 func getPrivatePackage(url string, name string, recursive bool, update bool) error {
 	packageDirectoryExists, err := Exists(packageDirectory)
 	if err != nil {
 		return err
 	}
-	if *packageDirectoryExists == false {
+	if !packageDirectoryExists {
 		os.MkdirAll(packageDirectory, os.ModePerm)
 	}
 	packagePath := fmt.Sprintf("%s/%s", packageDirectory, name)
@@ -337,7 +336,7 @@ func getPrivatePackage(url string, name string, recursive bool, update bool) err
 	if err != nil {
 		return err
 	}
-	if *packagePathExists == true {
+	if packagePathExists {
 		if !update {
 			return nil
 		}
@@ -349,7 +348,7 @@ func getPrivatePackage(url string, name string, recursive bool, update bool) err
 	if !strings.HasSuffix(url, ".git") {
 		url = fmt.Sprintf("%s.git", url)
 	}
-	err = Run("git", fmt.Sprintf("clone %s %s", url, name), packageDirectory)
+	err = Run("git", fmt.Sprintf("clone %s %s", url, name), &packageDirectory)
 	if err != nil {
 		return err
 	}
@@ -357,57 +356,57 @@ func getPrivatePackage(url string, name string, recursive bool, update bool) err
 	if err != nil {
 		panic(err)
 	}
-	if *packageFileExists == true && recursive {
+	if packageFileExists && recursive {
 		// ModFileCreate(name, fmt.Sprintf("%s/%s", packagePath, name))
 		// Run(fmt.Sprintf("%s/go-painless/bin/%s", homeDirectory, goPainlessFileName), "restore", fmt.Sprintf("%s/%s", packagePath, name))
 		ModFileCreate(name, packagePath)
-		Run(fmt.Sprintf("%s/go-painless/bin/%s", homeDirectory, goPainlessFileName), "restore", packagePath)
+		Run(fmt.Sprintf("%s/go-painless/bin/%s", homeDirectory, goPainlessFileName), "restore", &packagePath)
 	}
 	return nil
 }
-func Run(cmd string, args string, workingDirectory string) error {
+func Run(cmd string, args string, workingDirectory *string) error {
 	_cmd := exec.Command(cmd, strings.Split(args, " ")...)
-	if len(workingDirectory) != 0 {
-		_cmd.Dir = workingDirectory
+	if workingDirectory != nil {
+		_cmd.Dir = *workingDirectory
 	}
 	var outb, errb bytes.Buffer
 	_cmd.Stdout = &outb
 	_cmd.Stderr = &errb
 	err := _cmd.Run()
-	if err != nil {
-		return err
-	}
 	if errb.Len() > 0 {
-		color.HEX("#ffef00").Println(errb.String())
+		color.HEX(RED).Println(errb.String())
 	}
 	if outb.Len() > 0 {
-		color.Hex("#00ff5f").Println(outb.String())
+		color.Hex(YELLOW).Println(outb.String())
+	}
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
-func deleteDir(packagePath string) error {
-	_path, err := os.Open(packagePath)
-	if err != nil {
-		return err
-	}
-	files, err := _path.Readdir(-1)
-	if err != nil {
-		return err
-	}
-	for _, file := range files {
-		name := fmt.Sprintf("%s/%s", packagePath, file.Name())
-		err = os.Chmod(name, os.ModePerm)
-		if err != nil {
-			return err
-		}
-		err = os.RemoveAll(name)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
+//	func deleteDir(packagePath string) error {
+//		_path, err := os.Open(packagePath)
+//		if err != nil {
+//			return err
+//		}
+//		files, err := _path.Readdir(-1)
+//		if err != nil {
+//			return err
+//		}
+//		for _, file := range files {
+//			name := fmt.Sprintf("%s/%s", packagePath, file.Name())
+//			err = os.Chmod(name, os.ModePerm)
+//			if err != nil {
+//				return err
+//			}
+//			err = os.RemoveAll(name)
+//			if err != nil {
+//				return err
+//			}
+//		}
+//		return nil
+//	}
 func deleteFile(filePath string) error {
 	return os.Remove(filePath)
 }
@@ -439,7 +438,7 @@ func changeChange(name string, path string) error {
 }
 
 func CreateFromTemplate(templateName string, projectName string) {
-	err := Run("git", fmt.Sprintf("clone %s %s", templateName, projectName), "")
+	err := Run("git", fmt.Sprintf("clone %s %s", templateName, projectName), nil)
 	if err != nil {
 		panic(err)
 	}

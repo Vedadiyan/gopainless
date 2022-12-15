@@ -1,12 +1,24 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
 	"sort"
 	"strings"
 )
+
+const (
+	INVALID_COMMAND_LINE_ARGUMENT ParserError = ParserError("invalid command line argument")
+	COMMAND_GROUP_NOT_FOUND       ParserError = ParserError("command group not found")
+)
+
+type ParserError string
+
+func (parserError ParserError) Error() string {
+	return string(parserError)
+}
 
 type Token struct {
 	must     map[string]*string
@@ -39,7 +51,7 @@ func (token Token) GetFlag(command string) bool {
 	return token.flags[command]
 }
 
-func (token Token) PrintHelp() {
+func (token Token) Help() string {
 	longest := 0
 	sortedKeys := make([]string, 0)
 	for key, value := range token.help {
@@ -53,26 +65,29 @@ func (token Token) PrintHelp() {
 	sort.Slice(sortedKeys, func(i, j int) bool {
 		return sortedKeys[i] < sortedKeys[j]
 	})
+	buffer := bytes.NewBufferString("")
 	for _, key := range sortedKeys {
 		_, isMust := token.must[key]
 		_, isOptional := token.must[key]
 		if isMust || isOptional {
-			fmt.Printf("-")
-			fmt.Print(key)
+			buffer.WriteString("-")
+			buffer.WriteString(key)
 			for i := 0; i < (longest-len(key)-1)+10; i++ {
-				fmt.Print(" ")
+				buffer.WriteString(" ")
 			}
 		} else if _, ok := token.flags[key]; ok {
-			fmt.Printf("--")
-			fmt.Print(key)
+			buffer.WriteString("--")
+			buffer.WriteString(key)
 			for i := 0; i < (longest-len(key)-2)+10; i++ {
-				fmt.Print(" ")
+				buffer.WriteString(" ")
 			}
 		} else {
 			panic("Unknown Case")
 		}
-		fmt.Println(token.help[key])
+		buffer.WriteString(token.help[key])
+		buffer.WriteString("\r\n")
 	}
+	return buffer.String()
 }
 
 func (token *Token) RegisterCommand(cmd string, help string, defaultValue *string) *Token {
@@ -121,15 +136,14 @@ func (command *Command) Parse() (string, *Token, error) {
 			continue
 		}
 		if prev == nil {
-			panic("Invalid Command Line Argument")
+			return "", nil, INVALID_COMMAND_LINE_ARGUMENT
 		}
 		commands[*prev] = val
 		prev = nil
 	}
 	value, ok := command.commands[group]
 	if !ok {
-		command.PrintHelp()
-		return "", nil, errors.New("Command group not found")
+		return "", nil, COMMAND_GROUP_NOT_FOUND
 	}
 	errs := make([]string, 0)
 	for key, val := range value.must {
@@ -153,13 +167,12 @@ func (command *Command) Parse() (string, *Token, error) {
 		}
 	}
 	if len(errs) != 0 {
-		value.PrintHelp()
-		return "", nil, errors.New(strings.Join(errs, "\r\n"))
+		return group, &value, errors.New(strings.Join(errs, "\r\n"))
 	}
 	return group, &value, nil
 }
 
-func (command Command) PrintHelp() {
+func (command Command) Help() string {
 	longest := 0
 	sortedKeys := make([]string, 0)
 	for key, value := range command.help {
@@ -173,11 +186,14 @@ func (command Command) PrintHelp() {
 	sort.Slice(sortedKeys, func(i, j int) bool {
 		return sortedKeys[i] < sortedKeys[j]
 	})
+	buffer := bytes.NewBufferString("")
 	for _, key := range sortedKeys {
-		fmt.Print(key)
+		buffer.WriteString(key)
 		for i := 0; i < (longest-len(key))+10; i++ {
-			fmt.Print(" ")
+			buffer.WriteString(" ")
 		}
-		fmt.Println(command.help[key])
+		buffer.WriteString(command.help[key])
+		buffer.WriteString("\r\n")
 	}
+	return buffer.String()
 }
