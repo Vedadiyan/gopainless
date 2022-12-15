@@ -21,7 +21,7 @@ You need to add the path `HomeDirectory/go-painless/bin` to your path variables.
 
 |Command| Description  | Example | Notes |
 |--|--|--|--|
-| initialize | creates a new go project  | go-painless add -N demo -V v1.0.0| -N = the name of the project <br /> -V = the version of the project 
+| init | creates a new go project  | go-painless init -N demo -V v1.0.0| -N = the name of the project <br /> -V = the version of the project 
 | create | creates a project based on a template project | go-painless create -T github.com/abc/efg.git -N github.com/abc/xyz | -T = the template repository url <br/> -N = the name of the project
 |add| adds a go dependency | go-painless add -U https://github.com/abc/efg.git -N custom_dependency_name --private --recursive | -U = the URL of the dependency (whether private or public) <br /> -N = the name used to reference the dependency. This name is used for referencing private packages.  <br />  --private = used for installing private packages <br /> --recursive = used for installing nested dependencies in go-painless maintained packages <br /> --update = used for updating existing packages 
 | remove | removes a go dependency | go-painless remove -N custom_dependency_name | -N = the name of the dependency to be removed
