@@ -2,7 +2,10 @@ module github.com/vedadiyan/gopainless
 
 go 1.18
 
-require github.com/gookit/color v1.5.2
+require (
+	github.com/gookit/color v1.5.2
+	github.com/vedadiyan/flaggy v0.0.0-20221219033138-26132b917d46
+)
 
 require (
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
