@@ -1,3 +1,5 @@
+**This project is moved to https://github.com/Vedadiyan/gopher**
+
 # Go Painless (as an extension to the original `go` CLI)
 ![Go Version](https://img.shields.io/badge/Go-%3E%3D%201.18-%23007d9c)
 [![Go report](https://goreportcard.com/badge/github.com/vedadiyan/gopainless)](https://goreportcard.com/report/github.com/vedadiyan/gopainless)
