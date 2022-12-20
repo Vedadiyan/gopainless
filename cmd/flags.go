@@ -7,29 +7,29 @@ import (
 
 	"github.com/gookit/color"
 	flaggy "github.com/vedadiyan/flaggy/pkg"
-	gopainless "github.com/vedadiyan/gopainless/internal"
+	gopher "github.com/vedadiyan/gopher/internal"
 )
 
 type Flags struct {
 	Create  Create  `long:"create" short:"" help:"Used for creating a new project based on an existing template"`
-	Setup   bool    `long:"setup" short:"" help:"Setups go-painless in the system"`
+	Setup   bool    `long:"setup" short:"" help:"Setups gopher in the system"`
 	Init    Init    `long:"init" short:"" help:"Initializes a new project"`
 	Install Install `long:"install" short:"" help:"Installs a dependency"`
 	Remove  Remove  `long:"remove" short:"" help:"Removes an existing dependency"`
 	Restore Restore `long:"restore" short:"" help:"Restores dependencies in an existing project"`
 	Clear   bool    `long:"clear" short:"" help:"Removes go.mod and go.sum files"`
 	Publish Publish `long:"publish" short:"" help:"Builds the project"`
-	Help    bool    `long:"help" short:"" help:"Shows go-painless help"`
+	Help    bool    `long:"help" short:"" help:"Shows gopher help"`
 }
 
 func (f Flags) Run() error {
 	if !flaggy.Parsed() {
-		color.Hex(gopainless.YELLOW).Println("Falling back to `go`")
-		gopainless.Run("go", strings.Join(os.Args[1:], " "), nil)
+		color.Hex(gopher.YELLOW).Println("Falling back to `go`")
+		gopher.Run("go", strings.Join(os.Args[1:], " "), nil)
 		return nil
 	}
 	if f.Setup {
-		gopainless.Setup()
+		gopher.Setup()
 		return nil
 	}
 	if f.Help {
@@ -58,7 +58,7 @@ func (c Create) Run() error {
 		flaggy.PrintHelp()
 		return nil
 	}
-	gopainless.CreateFromTemplate(c.Template, c.Name)
+	gopher.CreateFromTemplate(c.Template, c.Name)
 	return nil
 }
 
@@ -81,8 +81,8 @@ func (i Init) Run() error {
 		flaggy.PrintHelp()
 		return nil
 	}
-	gopainless.PkgFileCreate(i.Name, i.Version)
-	gopainless.ModFileCreate(i.Name, "")
+	gopher.PkgFileCreate(i.Name, i.Version)
+	gopher.ModFileCreate(i.Name, "")
 	return nil
 }
 
@@ -103,11 +103,13 @@ func (i Install) Run() error {
 		failing = true
 	}
 	if failing {
-		color.Hex(gopainless.YELLOW).Println("Falling back to `go`")
-		gopainless.Run("go", fmt.Sprintf("install %s", strings.Join(os.Args[2:], "")), nil)
+		color.Hex(gopher.YELLOW).Println("Falling back to `go`")
+		gopher.Run("go", fmt.Sprintf("install %s", strings.Join(os.Args[2:], "")), nil)
 		return nil
 	}
-	gopainless.PkgAdd(i.Url, i.Name, i.Private, i.Update, i.Recursive)
+	gopher.PkgFileLoad()
+	gopher.PkgAdd(i.Url, i.Name, i.Private, i.Update, i.Recursive)
+	gopher.Write()
 	return nil
 }
 
@@ -125,7 +127,7 @@ func (r Remove) Run() error {
 		flaggy.PrintHelp()
 		return nil
 	}
-	gopainless.PkgDelete(r.Name)
+	gopher.PkgDelete(r.Name)
 	return nil
 }
 
@@ -135,9 +137,11 @@ type Restore struct {
 }
 
 func (r Restore) Run() error {
-	gopainless.PkgRestore(true, r.Update)
+	gopher.PkgFileLoad()
+	gopher.PkgRestore(true, r.Update)
+	gopher.Write()
 	if r.Tidy {
-		gopainless.Tidy()
+		gopher.Tidy()
 	}
 	return nil
 }
@@ -171,6 +175,6 @@ func (p Publish) Run() error {
 		flaggy.PrintHelp()
 		return nil
 	}
-	gopainless.Build(p.Runtime, p.Architecture, p.Output, p.Target)
+	gopher.Build(p.Runtime, p.Architecture, p.Output, p.Target)
 	return nil
 }
